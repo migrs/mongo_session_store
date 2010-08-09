@@ -6,6 +6,8 @@ module ActionController
 
       class Session
         include MongoMapper::Document
+        set_collection_name ':sessions'
+
         key :data, String, :default => [Marshal.dump({})].pack("m*")
         timestamps!
 

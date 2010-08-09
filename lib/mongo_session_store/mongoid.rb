@@ -7,6 +7,7 @@ module ActionController
       class Session
         include Mongoid::Document
         include Mongoid::Timestamps
+        self.collection_name = 'sessions'
 
         field :data, :type => String, :default => [Marshal.dump({})].pack("m*")
         index :updated_at
@@ -19,10 +20,6 @@ module ActionController
       SESSION_RECORD_KEY = 'rack.session.record'.freeze
 
       private
-        def generate_sid
-          Mongo::ObjectID.new
-        end
-
         def get_session(env, sid)
           sid ||= generate_sid
           session = find_session(sid)
@@ -38,8 +35,9 @@ module ActionController
         end
 
         def find_session(id)
-          @@session_class.find(id) ||
-            @@session_class.new(:id=>id)
+          @@session_class.find(id)
+        rescue Mongoid::Errors::DocumentNotFound
+          @@session_class.new(:id => id)
         end
 
         def pack(data)
